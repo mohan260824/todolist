@@ -5,7 +5,7 @@ import './App.css';
 const Home = ({ task, setTask, handleAddTask, showModal }) => (
   <div className="container">
     <header>
-      <h1>Hello Folk!!</h1>
+      <h1>Hello Folk!!!</h1>
       <p>What we do daily, the habits we form, determine our future</p>
     </header>
     <div className="task-input">
