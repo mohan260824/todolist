@@ -9,7 +9,7 @@ const Home = ({ task, setTask, handleAddTask, showModal }) => (
       <p>What we do daily, the habits we form, determine our future</p>
     </header>
     <div className="task-input">
-      <h2>Add Your Tasks</h2>
+      <h2>Add Your Task</h2>
       <input
         type="text"
         value={task}
@@ -38,7 +38,7 @@ const Home = ({ task, setTask, handleAddTask, showModal }) => (
   </div>
 );
 
-const TaskList = ({ tasks, handleTaskClick, handleCheckboxChange }) => (
+const TaskList = ({ tasks, handleCheckboxChange, handleEditTask, handleSaveEditTask, setTask, task, isEditing, editingIndex }) => (
   <div className="container">
     <header>
       <h1>Your Tasks</h1>
@@ -46,13 +46,29 @@ const TaskList = ({ tasks, handleTaskClick, handleCheckboxChange }) => (
     <div className="task-list">
       <ul>
         {tasks.length > 0 ? (
-          tasks.map((task, index) => (
+          tasks.map((taskItem, index) => (
             <li key={index}>
               <input
                 type="checkbox"
-                onChange={() => handleCheckboxChange(task)}
+                onChange={() => handleCheckboxChange(taskItem)}
               />
-              {task}
+              {isEditing && editingIndex === index ? (
+                <>
+                  {/* Input for editing the task */}
+                  <input
+                    type="text"
+                    value={task} // This will be controlled by the 'task' state
+                    onChange={(e) => setTask(e.target.value)} // Update 'task' state on input change
+                    placeholder="Edit task"
+                  />
+                  <button onClick={() => handleSaveEditTask(index)}>Save</button>
+                </>
+              ) : (
+                <>
+                  {taskItem}
+                  <button onClick={() => handleEditTask(index)}>Edit</button>
+                </>
+              )}
             </li>
           ))
         ) : (
@@ -93,6 +109,8 @@ const App = () => {
   const [tasks, setTasks] = useState([]);
   const [completedTasks, setCompletedTasks] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingIndex, setEditingIndex] = useState(null);
 
   const handleAddTask = () => {
     if (task.trim()) {
@@ -116,6 +134,23 @@ const App = () => {
     localStorage.setItem('completedTasks', JSON.stringify(updatedCompletedTasks));
   };
 
+  const handleEditTask = (index) => {
+    setEditingIndex(index);
+    setTask(tasks[index]); // Set the task value to edit
+    setIsEditing(true); // Enable editing mode
+  };
+
+  const handleSaveEditTask = (index) => {
+    if (task.trim()) {
+      const updatedTasks = [...tasks];
+      updatedTasks[index] = task; // Save the edited task
+      setTasks(updatedTasks);
+      localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+      setIsEditing(false); // Exit editing mode
+      setTask(''); // Clear the input
+    }
+  };
+
   return (
     <Router>
       <Routes>
@@ -125,7 +160,7 @@ const App = () => {
         />
         <Route
           path="/view-tasks"
-          element={<TaskList tasks={tasks} handleCheckboxChange={handleCheckboxChange} />}
+          element={<TaskList tasks={tasks} handleCheckboxChange={handleCheckboxChange} handleEditTask={handleEditTask} handleSaveEditTask={handleSaveEditTask} setTask={setTask} task={task} isEditing={isEditing} editingIndex={editingIndex} />}
         />
         <Route
           path="/show-completed-tasks"
